@@ -1,5 +1,4 @@
 # Code-Debugging-RAG-Agent
-# RAG Project with Marqo and Ollama
 
 This repository demonstrates a **Retrieval-Augmented Generation (RAG)** workflow that uses [Marqo](https://github.com/marqo-ai/marqo) as the vector store for code documents and [Ollama](https://github.com/jmorganca/ollama) as the Large Language Model (LLM) generator. The pipeline leverages [Langchain Community](https://github.com/langchain4j/langchain-community) wrappers to seamlessly integrate both Marqo and Ollama.
 
