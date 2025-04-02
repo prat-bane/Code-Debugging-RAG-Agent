@@ -1,0 +1,623 @@
+Directory structure:
+└── agnidipto-594-demo-app/
+    ├── README.md
+    ├── app.py
+    ├── logger.py
+    ├── models.py
+    ├── test_app.py
+    └── utils.py
+
+================================================
+File: README.md
+================================================
+# Demo Flask Application with Deliberate Bugs
+
+This project is a demonstration REST API application with deliberately introduced bugs, errors, and inefficiencies to generate meaningful logs for testing RAG-based debugging systems.
+
+## Project Overview
+
+The application is a simple task management API that provides endpoints for:
+- Managing users
+- Creating and retrieving tasks
+- Processing data
+- Searching
+- Debug endpoints that trigger specific errors
+
+The application is designed to fail in various ways and generate rich, contextual logs that can be analyzed by an AI-powered debugging system.
+
+## Project Structure
+
+```
+.
+├── app.py              # Main application with API routes
+├── models.py           # Database models and initialization
+├── logger.py           # Logging configuration
+├── requirements.txt    # Project dependencies
+├── logs/               # Directory for log files
+│   ├── app.log         # General application logs
+│   ├── error.log       # Error-level logs
+│   └── performance.log # Request timing and performance data
+├── test_app.py         # Script to generate test traffic
+├── log_reader.py       # Utility to read and analyze logs
+└── log_monitor_rag.py  # Skeleton for RAG-based debugging system
+```
+
+## Deliberate Errors and Bugs
+
+The application contains the following types of deliberate errors:
+
+### Database and Connection Issues
+- **Simulated timeouts** in `app.py` → `get_users()` function:
+  ```python
+  # Deliberate bug: occasional timeout simulation
+  if random.random() < 0.1:  # 10% chance
+      logger.warning("Simulating database timeout")
+      time.sleep(3)
+      # Sometimes succeed, sometimes fail
+      if random.random() < 0.5:
+          raise TimeoutError("Database connection timed out")
+  ```
+
+- **SQL injection vulnerability** in `app.py` → `create_user()` function:
+  ```python
+  # Check for existing user - deliberate bug in SQL query
+  if random.random() < 0.15:  # 15% chance
+      logger.debug("About to execute query with deliberate SQL error")
+      existing_user = db.session.execute("SELECT * FROM user WHERE username = '" + data['username'] + "'").fetchone()
+  ```
+
+### Input Validation Issues
+- **Missing validation** for required fields in `app.py` → `create_user()` function:
+  ```python
+  # Deliberate bug: missing required fields validation
+  if 'username' not in data or 'email' not in data:
+      # We won't handle this correctly, causing an error
+      pass
+  ```
+
+- **Weak email validation** in `app.py` → `create_user()` function:
+  ```python
+  # Email validation - deliberate bug
+  if not '@' in data.get('email', ''):
+      logger.warning(f"Invalid email format: {data.get('email')}")
+      return jsonify({"error": "Invalid email format"}), 400
+  ```
+
+### Performance Issues
+- **Inefficient query** in `app.py` → `get_user_tasks()` function:
+  ```python
+  # Deliberate bug: inefficient query that might timeout
+  if random.random() < 0.2:  # 20% chance
+      logger.debug("Using inefficient query pattern")
+      time.sleep(1)  # Simulate slow query
+      
+      # Memory inefficient approach
+      all_tasks = Task.query.all()
+      tasks = [task for task in all_tasks if task.user_id == user_id]
+  ```
+
+- **Slow search** in `app.py` → `search()` function:
+  ```python
+  # Deliberately inefficient search if query is too short
+  if len(query) < 3:
+      logger.warning(f"Short search query detected: '{query}'. This may cause performance issues.")
+      
+      # Simulate slow search for short queries
+      time.sleep(1.5)
+  ```
+
+### Memory Issues
+- **Memory leak simulation** in `app.py` → `process_data()` function:
+  ```python
+  # Simulated memory leak
+  large_list = []
+  for i in range(min(len(str(data)), 100000)):
+      large_list.append(str(i) * 100)
+  
+  # Randomly fail for large operations
+  if random.random() < 0.3:  # 30% chance
+      logger.error("Memory error during processing large dataset")
+      raise MemoryError("Insufficient memory for operation")
+  ```
+
+### Reference Errors
+- **Non-existent field access** in `app.py` → `create_task()` function:
+  ```python
+  # Deliberate bug: sometimes we'll try to access a field that might not exist
+  if random.random() < 0.15:  # 15% chance
+      priority = data['priorityLevel']  # This key doesn't exist in client requests
+      logger.debug(f"Attempting to access non-existent field: {priority}")
+  ```
+
+### Debug Endpoints
+The application also provides endpoints that deliberately trigger various types of errors:
+
+- `/api/debug?type=division`: Triggers a division by zero error
+- `/api/debug?type=reference`: Triggers a reference error (undefined variable)
+- `/api/debug?type=recursion`: Triggers a recursion depth error
+- `/api/debug?type=memory`: Attempts to allocate a large amount of memory
+- `/api/debug?type=generic`: Triggers a generic error
+
+## Setting Up the Project
+
+1. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. Run the Flask application:
+   ```
+   python app.py
+   ```
+
+3. Generate test traffic:
+   ```
+   python test_app.py
+   ```
+
+4. View and analyze logs:
+   ```
+   python log_reader.py
+   ```
+
+5. Test the RAG-based debugging skeleton:
+   ```
+   python log_monitor_rag.py
+   ```
+
+## API Documentation
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/users` | Get all users |
+| POST | `/api/users` | Create a new user |
+| GET | `/api/users/{user_id}/tasks` | Get tasks for a specific user |
+| POST | `/api/users/{user_id}/tasks` | Create a new task for a user |
+| POST | `/api/process` | Process data payload |
+| GET | `/api/search?q={query}` | Search for users and tasks |
+| GET | `/api/debug?type={error_type}` | Trigger deliberate errors for testing |
+
+## Log Files
+
+The application generates three types of log files:
+
+- **app.log**: General application logs with all severity levels
+- **error.log**: Error-level logs only
+- **performance.log**: Request timing and performance data
+
+These logs provide rich information about application state, errors, and performance issues that can be used to train and test RAG-based debugging systems.
+
+## RAG-Based Debugging
+
+The `log_monitor_rag.py` file provides a skeleton implementation for a RAG-based debugging system that:
+
+1. Monitors log files for new error entries
+2. Detects patterns of similar errors
+3. Retrieves relevant code and past solutions via vector search (mocked)
+4. Generates diagnostics and resolution steps (mocked)
+
+You can extend this implementation with actual vector database connections, embedding generation, and language model integration to create a fully functional debugging system.
+
+
+================================================
+File: app.py
+================================================
+import os
+import json
+import uuid
+import time
+import random
+from datetime import datetime
+from flask import Flask, request, jsonify
+from werkzeug.exceptions import HTTPException
+
+# Import our custom modules
+from logger import logger
+from models import db, User, Task, init_db
+import utils
+
+ALLOW_FULL_EXECUTION_INFO = False
+
+# Initialize Flask app
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize database with our app
+init_db(app)
+
+# Routes
+@app.route('/')
+def home():
+    logger.info("API root accessed")
+    return jsonify({
+        "message": "Task Manager API",
+        "version": "1.0",
+        "endpoints": [
+            {"method": "GET", "path": "/api/users", "description": "Get all users"},
+            {"method": "POST", "path": "/api/users", "description": "Create a new user"},
+            {"method": "GET", "path": "/api/users/{username}/tasks", "description": "Get tasks for a specific user"},
+            {"method": "POST", "path": "/api/users/{username}/tasks", "description": "Create a new task for a user"},
+            {"method": "POST", "path": "/api/users/{username}/task/{task_id}/complete", "description": "Complete a task for user"}
+        ]
+    })
+
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    try:
+        return utils.get_users()
+    except Exception as e:
+        logger.error(f"Error retrieving users: {str(e)}", exc_info=ALLOW_FULL_EXECUTION_INFO)
+        return jsonify({"error": "Failed to retrieve users"}), 500
+
+@app.route('/api/users', methods=['POST'])
+def create_user():    
+    try:
+        data = request.json
+        if not data:
+            logger.warning("Invalid request: No JSON data provided")
+            return jsonify({"error": "No data provided"}), 400
+        
+        username = data.get('username', None)
+        email = data.get('email', None)
+        phone_number = data.get('phone_number', None)
+        
+        return jsonify(utils.add_user(name= username, email=email, phone_number=phone_number))
+    
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating user: {str(e)}", exc_info=ALLOW_FULL_EXECUTION_INFO)
+        return jsonify({"error": "Failed to create user"}), 500
+
+@app.route('/api/users/<username>/tasks', methods=['GET'])
+def get_user_tasks(username):
+    try:
+        return jsonify(utils.get_user_tasks(username=username))
+    except Exception as e:
+        logger.error(f"Error retrieving tasks for user {username}: {str(e)}", exc_info=ALLOW_FULL_EXECUTION_INFO)
+        return jsonify({"error": "Failed to retrieve tasks"}), 500
+
+@app.route('/api/users/<username>/tasks', methods=['POST'])
+def create_task(username: str):
+    try:
+        # Check if user exists        
+        data = request.json
+        if not data:
+            logger.warning("Invalid request: No JSON data provided")
+            return jsonify({"error": "No data provided"}), 400
+        
+        title = data.get('title', None)
+        description = data.get('description', None)
+        completed = data.get('completed', None)
+        priority = data.get('completed', None)
+        
+        return jsonify(utils.add_user_task(username, title, description, completed, priority))
+    
+    # except KeyError as e:
+    #     db.session.rollback()
+    #     logger.error(f"Missing required field: {str(e)}", exc_info=True)
+    #     return jsonify({"error": f"Missing required field: {str(e)}"}), 400
+    
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating task for user {username}: {str(e)}", exc_info=ALLOW_FULL_EXECUTION_INFO)
+        return jsonify({"error": "Failed to create task"}), 500
+    
+@app.route('/api/users/<username>/task/<task_id>/complete', methods=['POST'])
+def complete_task(username: str, task_id: int) :
+    try :
+        return jsonify(utils.complete_task(username, task_id))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error completing task for user {username}: {str(e)}", exc_info=ALLOW_FULL_EXECUTION_INFO)
+        return jsonify({"error": "Failed to complete task"}), 500
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    logger.warning(f"404 error: {request.path} not found")
+    return jsonify({"error": "Resource not found"}), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    logger.error(f"500 error: {str(error)}", exc_info=ALLOW_FULL_EXECUTION_INFO)
+    return jsonify({"error": "Internal server error"}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Pass through HTTP errors
+    if isinstance(e, HTTPException):
+        return e
+    
+    # Log unexpected errors
+    logger.error(f"Unhandled exception: {str(e)}", exc_info=ALLOW_FULL_EXECUTION_INFO)
+    return jsonify({"error": "An unexpected error occurred"}), 500
+
+if __name__ == '__main__':
+    logger.info("Application starting")
+    app.run(debug=True)
+
+
+================================================
+File: logger.py
+================================================
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+
+# Configure logging directory
+if not os.path.exists('../logs'):
+    os.mkdir('../logs')
+
+# Main logger setup
+file_handler = RotatingFileHandler('../logs/app.log', maxBytes=1024000, backupCount=10)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] - %(message)s'
+))
+file_handler.setLevel(logging.INFO)
+
+# # Error logger for severe issues
+# error_handler = RotatingFileHandler('../logs/error.log', maxBytes=10240, backupCount=10)
+# error_handler.setFormatter(logging.Formatter(
+#     '%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] - %(message)s'
+# ))
+# error_handler.setLevel(logging.ERROR)
+
+# # Performance logger
+# perf_handler = RotatingFileHandler('../logs/performance.log', maxBytes=10240, backupCount=5)
+# perf_handler.setFormatter(logging.Formatter(
+#     '%(asctime)s - %(message)s'
+# ))
+# perf_handler.setLevel(logging.INFO)
+
+# Set up logger instances
+logger = logging.getLogger('app')
+logger.setLevel(logging.INFO)
+logger.addHandler(file_handler)
+# logger.addHandler(error_handler)
+
+# perf_logger = logging.getLogger('performance')
+# perf_logger.setLevel(logging.INFO)
+# perf_logger.addHandler(perf_handler)
+
+# Make sure we don't duplicate log messages when the app imports this file
+if not logger.handlers:
+    logger.addHandler(file_handler)
+    # logger.addHandler(error_handler)
+
+# if not perf_logger.handlers:
+#     perf_logger.addHandler(perf_handler)
+
+
+================================================
+File: models.py
+================================================
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+
+# Initialize SQLAlchemy instance
+db = SQLAlchemy()
+
+# Models
+class User(db.Model):
+    username = db.Column(db.String(80), primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone_number = db.Column(db.String(20), unique=True, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<User {self.username}>'
+    
+    def to_dict(self):
+        return {
+            'username': self.username,
+            'email': self.email,
+            'phone_number': self.phone_number,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+class Task(db.Model):
+    task_id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    username = db.Column(db.String(80), db.ForeignKey('user.username'), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    priority = db.Column(db.Integer, db.CheckConstraint('priority >= 1 AND priority <= 5'), default=1)  # 1-5 scale
+    
+    def to_dict(self):
+        return {
+            'task_id': self.task_id,
+            'title': self.title,
+            'description': self.description,
+            'user_username': self.username,
+            'completed': self.completed,
+            'priority': self.priority
+        }
+
+def init_db(app):
+    """Initialize the database, create tables and sample data"""
+    from logger import logger
+    
+    db.init_app(app)
+    
+    with app.app_context():
+        db.create_all()
+        
+        # Add some sample data if database is empty
+        if User.query.count() == 0:
+            logger.info("Initializing database with sample data")
+            
+            # Create sample users
+            user1 = User(username="johndoe", email="john@example.com")
+            user2 = User(username="janedoe", email="jane@example.com")
+            db.session.add(user1)
+            db.session.add(user2)
+            db.session.commit()
+            
+            # Create sample tasks
+            task1 = Task(title="Complete project", description="Finish the Flask project", username="johndoe", priority=3)
+            task2 = Task(title="Buy groceries", description="Milk, eggs, bread", username="johndoe", priority=2)
+            task3 = Task(title="Learn Flask", description="Study Flask documentation", username="janedoe", priority=4)
+            
+            db.session.add_all([task1, task2, task3])
+            db.session.commit()
+            
+            logger.info("Sample data created successfully")
+
+
+================================================
+File: test_app.py
+================================================
+import requests
+import random
+import json
+
+BASE_URL = "http://localhost:5000"
+
+# List of valid and invalid usernames for testing
+valid_users = ["johndoe", "janedoe"]
+invalid_users = ["nonexistent", "fakeuser", "testuser123"]
+
+# Function to make API calls
+def make_api_call(endpoint, method="GET", data=None):
+    url = f"{BASE_URL}{endpoint}"
+    headers = {"Content-Type": "application/json"}
+    
+    try:
+        if method == "GET":
+            response = requests.get(url)
+        elif method == "POST":
+            response = requests.post(url, headers=headers, data=json.dumps(data) if data else None)
+        
+        print(f"{method} {url} - Status: {response.status_code}")
+        return response
+    except Exception as e:
+        print(f"Error making {method} request to {url}: {str(e)}")
+        return None
+
+# Define various API calls - both valid and invalid
+api_calls = [
+    # Successful calls
+    lambda: make_api_call("/api/users", "GET"),  # Get all users
+    lambda: make_api_call("/api/users", "POST", {"username": f"user_{random.randint(1000, 9999)}", "email": f"user{random.randint(1000, 9999)}@example.com", "phone_number": f"+1{random.randint(1000000000, 9999999999)}"}),  # Create valid user
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "GET"),  # Get tasks for valid user
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"title": f"Task {random.randint(1, 100)}", "description": "This is a test task", "completed": False, "priority": random.randint(1, 5)}),  # Create valid task
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/task/1/complete", "POST"),  # Complete task 1 for valid user
+    
+    # Error-generating calls
+    lambda: make_api_call("/api/nonexistent", "GET"),  # 404 error - endpoint doesn't exist
+    lambda: make_api_call("/api/users", "POST", {}),  # Missing required fields
+    lambda: make_api_call("/api/users", "POST", {"username": None, "email": "invalid"}),  # Invalid email format
+    lambda: make_api_call(f"/api/users/{random.choice(invalid_users)}/tasks", "GET"),  # User doesn't exist
+    lambda: make_api_call(f"/api/users/{random.choice(invalid_users)}/tasks", "POST", {"title": "Task", "description": "Test"}),  # Creating task for non-existent user
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/task/999/complete", "POST"),  # Task ID doesn't exist
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"title": None}),  # Missing required task field
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"priority": 10}),  # Invalid priority value
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/task/abc/complete", "POST"),  # Invalid task ID format
+]
+
+# Add some more random API call variations to reach 30 total calls
+additional_calls = [
+    # More successful calls
+    lambda: make_api_call("/", "GET"),  # Access API root
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"title": "Priority Task", "description": "High priority task", "priority": 5}),
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"title": "Completed Task", "description": "Already done", "completed": True}),
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/task/2/complete", "POST"),
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/task/3/complete", "POST"),
+    
+    # More error-generating calls
+    lambda: make_api_call("/api/users/1", "GET"),  # Using ID instead of username
+    lambda: make_api_call("/api/users", "POST", {"username": random.choice(valid_users), "email": "duplicate@example.com"}),  # Duplicate username
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}", "DELETE"),  # Method not allowed
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"description": "Missing title field"}),
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"title": "Task with extremely long description" * 1000}),  # Extremely long description
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", {"title": "", "description": ""}),  # Empty values
+    lambda: make_api_call(f"/api/users/{random.choice(valid_users)}/tasks", "POST", None),  # No JSON data
+]
+
+# Combine all calls
+all_calls = api_calls + additional_calls
+
+# Randomly shuffle and select 30 calls (15 successful, 15 error-generating)
+random.shuffle(all_calls)
+selected_calls = all_calls[:30]
+
+# Execute the selected API calls
+print("Making 30 API calls (15 successful, 15 error-generating)...\n")
+for i, call in enumerate(selected_calls, 1):
+    print(f"Call {i}:")
+    call()
+    print()
+
+print("API testing completed.")
+
+
+================================================
+File: utils.py
+================================================
+from models import db, User, Task, init_db
+from logger import logger
+
+def get_users() -> list[dict]:
+  logger.info('Retrieving list of users')
+  users_list: list[User] = db.session.query(User).all()
+  users = [user.to_dict() for user in users_list]
+  return users
+
+def add_user(name: str, email: str, phone_number: str) -> dict:
+  user = User(username=name, email=email, phone_number=phone_number)
+  logger.info('Received user: ', user.to_dict())
+  db.session.add(user)
+  db.session.commit()
+  logger.info('User Added: ', user.username)
+  return {"success": True, "data": user.to_dict()}
+
+def get_user_tasks(username: str) -> list[dict] :
+  logger.info(f'Received username: {username}')
+  logger.info(f'Retrieving user: {username}')
+  user: User | None = db.session.query(User).filter(User.username == username).first()
+  if user:
+    logger.info('Found User')
+  else :
+    logger.error(f'No user found with username {username}')
+    
+  tasks_list: list[Task] = db.session.query(Task).filter(Task.username == user.username).all()
+  tasks: list[dict] = [task.to_dict() for task in tasks_list]
+  return tasks
+
+def add_user_task(username: str, title: str, description: str, completed: bool= False, priority: int= 1) -> dict:
+  logger.info('Attempting to add tasks to user')
+  logger.info(f'Received username: {username}')
+  logger.info(f'Retrieving user: {username}')
+  user: User | None = db.session.query(User).filter(User.username == username).first()
+  if not user:
+    logger.error(f'No user found with username {username}')
+    
+  task = Task(title=title, description=description, username=user.username, completed=completed, priority=priority)
+  logger.info(f'Received Task {task.to_dict()}')
+  db.session.add(task)
+  db.session.commit()
+  return {'success': True, 'data': task.to_dict()}
+
+def complete_task(username: str, task_id: int) :
+  logger.info('Attempting to mark task as completed')
+  logger.info(f'Received username: {username}')
+  logger.info(f'Retrieving user: {username}')
+  user: User | None = db.session.query(User).filter(User.username == username).first()
+  if not user:
+    logger.error(f'No user found with username {username}')
+    
+  logger.info(f'Received task_id: {task_id}')
+  logger.info(f'Retrieving task_id: {task_id}')
+  task: Task | None = db.session.query(Task).filter(Task.username == username, Task.task_id == task_id).first()
+  if not task:
+    logger.error(f'No task found with the task id {task_id} for user with username {username}')
+  
+  task.completed = True
+  db.session.commit()
+  return {'success': True, 'data': task.to_dict()}
+  
+
+
+  
+
