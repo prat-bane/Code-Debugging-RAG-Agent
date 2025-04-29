@@ -1,0 +1,30 @@
+2025-04-29 03:39:39,899 [uvicorn.error] INFO     Application startup complete.
+2025-04-29 03:39:39,899 [uvicorn.error] ERROR    Exception in worker process
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/usr/local/lib/python3.12/site-packages/uvicorn/server.py", line 66, in run
+    return asyncio.run(self.serve(sockets=sockets))
+  File "/usr/local/lib/python3.12/asyncio/runners.py", line 186, in run
+    return runner.run(main)
+  File "/usr/local/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+  File "/usr/local/lib/python3.12/site-packages/uvicorn/server.py", line 543, in serve
+    await self.startup(sockets)
+  File "/usr/local/lib/python3.12/site-packages/uvicorn/server.py", line 584, in startup
+    await self.app.setup()
+  File "/usr/local/lib/python3.12/site-packages/uvicorn/lifespan/on.py", line 26, in setup
+    await self.startup()
+  File "/usr/local/lib/python3.12/site-packages/uvicorn/lifespan/on.py", line 44, in startup
+    await callable(self.config.app)
+  File "/app/api/main.py", line 5, in <module>
+    from db.session import db_engine  # noqa: F401
+  File "/app/db/session.py", line 11, in <module>
+    db_url: str = db_settings.get_db_url()
+  File "/app/db/settings.py", line 31, in get_db_url
+    raise ValueError("Could not build database connection")
+ValueError: Could not build database connection
+
+2025-04-29 03:39:39,899 [uvicorn.error] INFO     Shutting down
