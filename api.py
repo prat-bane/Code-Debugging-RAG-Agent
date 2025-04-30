@@ -1,6 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from rag_debugger import debug_error, ensure_index   # import once, no heavy work
+#from rag_debugger import debug_error, ensure_index   # import once, no heavy work
+from rag_faiss_debugger import debug_error
 import uvicorn, asyncio
+
+from mailer import send_email
 
 app = FastAPI(
     title="RAG Debug-API",
@@ -8,11 +11,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
-@app.on_event("startup")
-def _warm_up():
-    # Make sure the Marqo index exists; skip re-ingest if already there
-    ensure_index("codebase")
+# @app.on_event("startup")
+# def _warm_up():
+#     # Make sure the Marqo index exists; skip re-ingest if already there
+#     ensure_index("codebase")
     # Optionally: ping Ollama so the first request is not cold
+
+
 
 @app.post("/debug", summary="Upload log file (.txt)")
 async def debug(file: UploadFile = File(...)):
@@ -22,6 +27,7 @@ async def debug(file: UploadFile = File(...)):
     log_text = (await file.read()).decode("utf-8", errors="ignore")
     # FastAPI default workers are threads → blocking call is okay
     solution = await asyncio.to_thread(debug_error, log_text)
+    send_email("pbane8@uic.edu", "RAG Solution Ready", solution)
     return {"solution": solution}
 
 if __name__ == "__main__":
