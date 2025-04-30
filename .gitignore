@@ -42,3 +42,7 @@ local_settings.py
 
 # macOS specific
 .DS_Store
+faiss_hnsw.pkl
+*.jar
+*.pkl
+*.jar
