@@ -1,0 +1,44 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files - exclude all env files and directories
+.env
+env/
+**/env/
+.env.*
+**/.env.*
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Database files
+*.db
+*.sqlite3
+
+# Test coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+
+# Build and distribution
+dist/
+build/
+*.egg-info/
+
+# Local development settings
+local_settings.py
+
+# Jupyter notebook
+.ipynb_checkpoints
+
+# macOS specific
+.DS_Store
