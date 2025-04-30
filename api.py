@@ -27,7 +27,7 @@ async def debug(file: UploadFile = File(...)):
     log_text = (await file.read()).decode("utf-8", errors="ignore")
     # FastAPI default workers are threads → blocking call is okay
     solution = await asyncio.to_thread(debug_error, log_text)
-    send_email("pbane8@uic.edu", "RAG Solution Ready", solution)
+    send_email("pbane8@uic.edu", "RAG Debugging Solution", solution)
     return {"solution": solution}
 
 if __name__ == "__main__":

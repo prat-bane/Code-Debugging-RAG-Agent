@@ -1,0 +1,46 @@
+Your code should modify the system such that it is not affected by this error (i.e., it will still be able to function properly despite the error).
+It should be as simple and elegant as possible; try your best to avoid "hacky" solutions.
+This challenge is intended to stretch your skills with Python, RAG, and debugging. 
+
+## Submitting Your Solution
+Your submission must include one file named `rag_system.py`. The file should contain the definition of a class named `RagSystem` that contains all of the functionality listed below (and possibly additional functionality). You may use any Python libraries to help solve this challenge.
+  * Include documentation for your code. (See [here](https://google.github.io/styleguide/pyguide.html) for an example.)
+
+### Your RagSystem class should have the following characteristics:
+* Implement a method named `retrieve_documents(query)` which returns all of the RAG documents that are relevant to the given query. 
+The query parameter is a string representing the query, and there will always be at most one query per submission (i.e., multiple queries should never be received by the system).
+* Implement a method named `search(query)` which returns all of the RAG documents that are relevant to the given query. The search method is identical in function to retrieve_documents, except that it may receive multiple queries. 
+For example, if you call search with arguments `['test', 'hello']`, it should return all of the RAG documents that are relevant to both 'test' and 'hello'. It should also accept multiple query parameters (e.g., passing ['test', 'hello', 'world'], and so on).
+* Implement a method named `add_document(doc)` which takes a single parameter `doc`, which is a dict containing the RAG document data as described above. Once a document has been added to the system, it cannot be removed from the system.
+For example:
+    add_document({'author': 'John Smith', 
+                   'title': 'Hello World!', 
+                   'abstract': '<p>Hello world!</p>'})
+* Implement a method named `update_document(doc)` which takes as input one parameter, `doc`, which is the same as above. Once a document has been updated in the system, it cannot be reverted to its previous state. 
+For example:
+    update_document({'author': 'John Smith', 
+                       'title': 'Hello World! (Revised)',
+                       'abstract': '<p>Hello world! Revised.</p>'})
+* Implement a method named `delete_document(doc)` which takes as input one parameter, `doc`, and deletes the RAG document from the system.
+For example:
+    delete_document({'author': 'John Smith', 
+                        'title': 'Hello World! (Revised)',
+                        'abstract': '<p>Hello world! Revised.</p>'})
+* Implement a method named `get_documents()` which returns all of the RAG documents that are currently in the system.
+For example:
+    get_documents()
+### Additional methods (optional)
+It is recommended but not required to implement other additional methods for your class, as long as they do not violate the description above and follow good Python style. 
+These include:
+* Implement a method named `add_user(name, email)` which takes two parameters, `name` and `email`. This method creates a new user in the system with the given name and email address; it should return an error if there is already another user with the same email.
+For example:
+    add_user('John Smith', 'johnsmith@example.com')
+* Implement a method named `delete_user(email)` which takes one parameter, `email`, and deletes that user from the system. Once a user is deleted from the system, it cannot be added back into the system. 
+For example:
+    delete_user('johnsmith@example.com')
+* Implement a method named `update_user(name, email)` which takes two parameters, `name` and `email`. This method updates the user with the given name and email address in the system; it should return an error if there is already another user with that name and/or email. 
+For example:
+    update_user('John Smith', 'johnsmith@example.com')
+* Implement a method named `get_users()` which returns all of the users in the system as dicts, where each entry is a single user with the fields described above (name and email).
+For example:
+    get_users()
