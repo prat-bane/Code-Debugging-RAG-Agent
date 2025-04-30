@@ -7,6 +7,7 @@ import threading
 import marqo
 import faiss
 from sentence_transformers import SentenceTransformer
+from codecarbon import EmissionsTracker
 
 # Reduce document size
 NUM_DOCS = 50
@@ -24,12 +25,14 @@ class BenchmarkTest:
        self.indexing_results = {
            "system": [],
            "time": [],
-           "memory_usage_mb": []
+           "memory_usage_mb": [],
+           "carbon": []
        }
        self.search_results = {
            "system": [],
            "time": [],
-           "memory_usage_mb": []
+           "memory_usage_mb": [],
+           "carbon": []
        }
        self.process = psutil.Process(os.getpid())
          
@@ -42,15 +45,17 @@ class BenchmarkTest:
    def _get_memory_usage(self):
        return self.process.memory_info().rss / (1024 * 1024)  # Convert to MB
          
-   def record_indexing_result(self, system, time_taken):
+   def record_indexing_result(self, system, time_taken, carbon):
        self.indexing_results["system"].append(system)
        self.indexing_results["time"].append(time_taken)
        self.indexing_results["memory_usage_mb"].append(self._get_memory_usage())
+       self.indexing_results["carbon"].append(carbon)
    
-   def record_search_result(self, system, time_taken):
+   def record_search_result(self, system, time_taken, carbon):
        self.search_results["system"].append(system)
        self.search_results["time"].append(time_taken)
        self.search_results["memory_usage_mb"].append(self._get_memory_usage())
+       self.search_results["carbon"].append(carbon)
          
    def get_indexing_df(self):
        return pd.DataFrame(self.indexing_results)
@@ -183,6 +188,7 @@ class MarqoBenchmark:
 
 def run_benchmark(num_docs=NUM_DOCS):
    benchmark = BenchmarkTest("Vector Database Comparison", num_docs)
+   tracker = EmissionsTracker()
    
    # Test FAISS Flat
    print(f"Testing FAISS Flat with {num_docs} documents...")
@@ -190,17 +196,23 @@ def run_benchmark(num_docs=NUM_DOCS):
    faiss_benchmark = FAISSBenchmark(index_type='flat')
    
    # Index documents
+   tracker.start()
    index_results = faiss_benchmark.index_documents(benchmark.docs)
+   carbon = tracker.stop()
    benchmark.record_indexing_result(
        "FAISS Flat", 
-       index_results["time"]
+       index_results["time"],
+       carbon
    )
    
    # Search
+   tracker.start()
    search_results = faiss_benchmark.search(benchmark.queries)
+   carbon=tracker.stop()
    benchmark.record_search_result(
        "FAISS Flat", 
-       search_results["time"]
+       search_results["time"],
+       carbon
    )
    
    # Test FAISS HNSW
@@ -209,17 +221,23 @@ def run_benchmark(num_docs=NUM_DOCS):
    faiss_hnsw_benchmark = FAISSBenchmark(index_type='hnsw')
    
    # Index documents
+   tracker.start()
    index_results = faiss_hnsw_benchmark.index_documents(benchmark.docs)
+   carbon = tracker.stop()
    benchmark.record_indexing_result(
        "FAISS HNSW", 
-       index_results["time"]
+       index_results["time"],
+       carbon
    )
    
    # Search
+   tracker.start()
    search_results = faiss_hnsw_benchmark.search(benchmark.queries)
+   carbon=tracker.stop()
    benchmark.record_search_result(
        "FAISS HNSW", 
-       search_results["time"]
+       search_results["time"],
+       carbon
    )
    
    # Test Marqo
@@ -229,17 +247,23 @@ def run_benchmark(num_docs=NUM_DOCS):
        marqo_benchmark = MarqoBenchmark()
        
        # Index documents
+       tracker.start()
        index_results = marqo_benchmark.index_documents(benchmark.docs)
+       carbon = tracker.stop()
        benchmark.record_indexing_result(
            "Marqo", 
-           index_results["time"]
+           index_results["time"],
+           carbon
        )
        
        # Search
+       tracker.start()
        search_results = marqo_benchmark.search(benchmark.queries)
+       carbon = tracker.stop()
        benchmark.record_search_result(
            "Marqo", 
-           search_results["time"]
+           search_results["time"],
+           carbon
        )
    except Exception as e:
        print(f"Marqo error: {e}")
@@ -287,7 +311,7 @@ if __name__ == "__main__":
            plt.ylabel("Time (seconds)")
            for i in ax.containers:
                ax.bar_label(i)
-           plt.savefig("./results/plots/faiss_indexing_time.png")
+           plt.savefig("./results/plots/indexing_time.png")
            plt.close()
            
            # Indexing memory comparison
@@ -312,6 +336,22 @@ if __name__ == "__main__":
            plt.title("Search Memory Usage Comparison")
            plt.ylabel("Memory (MB)")
            plt.savefig("./results/plots/search_memory.png")
+           plt.close()
+
+           # Indexing carbon emissions comparison
+           plt.figure(figsize=(10, 5))
+           sns.barplot(x="system", y="carbon", data=indexing_results)
+           plt.title("Indexing Carbon Emissions Comparison")
+           plt.ylabel("Kilograms (kg)")
+           plt.savefig("./results/plots/indexing_carbon.png")
+           plt.close()
+
+           # Search carbon emissions comparison
+           plt.figure(figsize=(10, 5))
+           sns.barplot(x="system", y="carbon", data=search_results)
+           plt.title("Search Carbon Emissions Comparison")
+           plt.ylabel("Kilograms (kg)")
+           plt.savefig("./results/plots/search_carbon.png")
            plt.close()
            
            print("Created separate charts in ./results/plots/")
