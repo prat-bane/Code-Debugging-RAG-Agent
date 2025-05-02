@@ -1,0 +1,94 @@
+
+The model you are trying to use was trained with embedding dimensions of [1024, 1024], which is the default.
+To train your model on a lower number of dimensions, adjust the `embedding_dim` parameter in the `.params` file.
+For example, by setting it to:
+    embeddings = RAG(
+        nb_classes=359,
+        nb_nodes=1406,
+        nb_layers=2,
+        nb_filters=[384],
+        dropout=0.2,
+        learning_rate=0.0001,
+    )
+
+You will see:
+    embeddings = RAG(
+        nb_classes=359,
+        nb_nodes=1406,
+        nb_layers=2,
+        nb_filters=[768],
+        dropout=0.2,
+        learning_rate=0.0001,
+    )
+
+You will also see a note in the `.params` file of your model:
+    embedding_dim=384
+
+### Solution ###
+
+The solution is to increase the number of dimensions used for the embeddings.
+
+To do this, open the `params/rag_system.py`, find the section that defines the model and change the `embedding_dim` parameter:
+```python
+    # the RAG layer
+    layer = RAG(
+        nb_classes=359,
+        nb_nodes=1406,
+        nb_layers=2,
+        nb_filters=[768],
+        dropout=0.2,
+        learning_rate=0.0001,
+    )
+```
+
+To do this, open the `params/rag_system.py`, find the section that defines the model and change the `embedding_dim` parameter:
+```python
+    # the RAG layer
+    layer = RAG(
+        nb_classes=359,
+        nb_nodes=1406,
+        nb_layers=2,
+        nb_filters=[768],
+        dropout=0.2,
+        learning_rate=0.0001,
+    )
+```
+
+To do this, open the `params/rag_system.py`, find the section that defines the model and change the `embedding_dim` parameter:
+```python
+    # the RAG layer
+    layer = RAG(
+        nb_classes=359,
+        nb_nodes=1406,
+        nb_layers=2,
+        nb_filters=[768],
+        dropout=0.2,
+        learning_rate=0.0001,
+    )
+```
+
+To do this, open the `params/rag_system.py`, find the section that defines the model and change the `embedding_dim` parameter:
+```python
+    # the RAG layer
+    layer = RAG(
+        nb_classes=359,
+        nb_nodes=1406,
+        nb_layers=2,
+        nb_filters=[768],
+        dropout=0.2,
+        learning_rate=0.0001,
+    )
+```
+
+To do this, open the `params/rag_system.py`, find the section that defines the model and change the `embedding_dim` parameter:
+```python
+    # the RAG layer
+    layer = RAG(
+        nb_classes=359,
+        nb_nodes=1406,
+        nb_layers=2,
+        nb_filters=[768],
+        dropout=0.2,
+        learning_rate=0.0001,
+    )
+```

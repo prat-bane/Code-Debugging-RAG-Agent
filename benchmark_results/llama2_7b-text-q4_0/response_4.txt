@@ -1,0 +1,21 @@
+"""
+from src import VectorDB as vdb
+import numpy as np
+from typing import Tuple
+
+
+class DebuggingAssistant:
+    """Helper class to debug a RAG system."""
+
+    def __init__(self, vdb: vdb.VectorDB):
+        self._vdb = vdb  # type: ignore
+
+    def set_input(self, input_vector: np.ndarray) -> Tuple[np.ndarray, np.int64]:
+        """Set the vector to be searched and number of nearest neighbors."""
+        assert len(input_vector) == 1024, "Input vector must have length 1024"
+        if self._vdb.embedding_dimension != input_vector.shape[0]:
+            raise IndexError("Embedding dimension mismatch. Expected {}, got {}".format(
+                self._vdb.embedding_dimension, input_vector.shape[0]
+            ))
+        results = self._vdb.similarity_search(input_vector, k=3)  # type: ignore
+        return results

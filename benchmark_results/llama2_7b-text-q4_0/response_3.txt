@@ -1,0 +1,5 @@
+
+RUN
+
+- Create a new RAG system with the same dataset and vocabulary as the original. If you are using an old version of gensim, you may need to change the name of your model from "glove" to something else so it doesn't overwrite the original.
+- Retrieve 3 documents similar to a given query using the similarity search API (i.e., without the autocomplete feature).

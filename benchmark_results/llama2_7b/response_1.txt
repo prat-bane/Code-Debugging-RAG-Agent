@@ -1,0 +1,11 @@
+The error message you provided indicates that there is a mismatch between the embedding dimensions in the `vector_db` and the query. The expected embedding dimension is 768, but the actual embedding dimension is 384.
+
+To solve this issue, you can try the following approaches:
+
+1. Check the vector database configuration: Make sure that the embedding dimension is set correctly in the `vector_db` configuration file or parameter. You can check the documentation of the library you are using to retrieve the correct configuration parameters.
+2. Update the query: Check if the query is correct and if it has the correct dimensions. Make sure that the query has the same embedding dimension as the vector database. If the query has a different embedding dimension, you may need to update it to match the vector database.
+3. Use a different similarity search algorithm: The `similarity_search` function in the RAG system may not be compatible with the embedding dimensions of your vector database. You can try using a different similarity search algorithm that is designed to work with different embedding dimensions, such as the `ball_tree_similarity_search` function provided by the RAG library.
+4. Use a pre-trained model: If you are using a custom vector database, you may want to consider using a pre-trained model that has the correct embedding dimension. This can save you time and effort in training a new model from scratch.
+5. Train a new model: If none of the above solutions work, you may need to train a new model with the correct embedding dimension. You can use the `train_model` function provided by the RAG library to train a new model.
+
+In any case, you will need to provide more information about your vector database and query to determine the exact cause of the error and find a solution.

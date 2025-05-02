@@ -1,0 +1,17 @@
+
+The error message indicates that there is a mismatch between the embedding dimension expected by the `similarity_search` function and the actual embedding dimension used in the `vector_db` model. The function is expecting an embedding dimension of 768, but the actual embedding dimension used in the `vector_db` model is 384.
+
+To solve this issue, you can either:
+
+1. Update the `vector_db` model to use an embedding dimension of 768. This can be done by setting the `embedding_dim` parameter in the `VectorDatabase` constructor to 768. For example:
+```python
+vector_db = VectorDatabase(file_path, embedding_dim=768)
+```
+2. Adjust the query vector to have an embedding dimension of 768 before passing it to the `similarity_search` function. This can be done using the `vectorized` function from the `sklearn.preprocessing` module:
+```python
+import sklearn.preprocessing as pp
+
+query = pp.vectorize(query, vector_length=768)
+results = vector_db.similarity_search(query, k=3)
+```
+By adjusting the query vector to have an embedding dimension of 768, you can fix the mismatch and avoid the `IndexError`.

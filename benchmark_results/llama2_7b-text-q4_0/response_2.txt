@@ -1,0 +1,6 @@
+```
+
+Explanation:
+
+You have a RAG database that has been trained on 500 documents.
+When querying the database with the vector `["wine", "bottle"]`, you get back an error. The reason is that your embedding dimension is too small, and it doesn't match what the model expects. You need to change this and retrain the model. See below for a guide on how to do so.

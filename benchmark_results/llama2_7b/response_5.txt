@@ -1,0 +1,12 @@
+The error message you provided indicates that the embedding dimension of the `vector_db` database is not matching the expected embedding dimension of 768. In the code snippet you provided, the `similarity_search()` method is expecting an embedding dimension of 768, but the `vector_db` database has an embedding dimension of 384.
+
+To fix this issue, you can either:
+
+1. Change the embedding dimension of the `vector_db` database to match the expected value of 768. This can be done by updating the configuration file or by using the `vector_db.set_embedding_dim()` method before calling the `similarity_search()` method.
+2. Adjust the code to accept a lower embedding dimension. In this case, you can reduce the value of `k` in the `similarity_search()` method to match the reduced embedding dimension of the `vector_db` database. For example, if the embedding dimension of the `vector_db` database is 384, you can set `k=2` instead of `k=3`.
+
+Here's an updated code snippet that takes into account the lower embedding dimension of the `vector_db` database:
+```python
+results = vector_db.similarity_search(query, k=2)
+```
+By adjusting the value of `k`, you can achieve the same result as before, but without the error message related to the mismatched embedding dimensions.

@@ -1,0 +1,3 @@
+
+### Suggested solution ###
+To avoid the error, you can either reduce the embedding size to 384, or increase the number of documents returned in a single search query (from 500 to say 1000), since the vector_db.similarity_search() method will take care of the rest.

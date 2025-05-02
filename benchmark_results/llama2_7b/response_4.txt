@@ -1,0 +1,13 @@
+The error message indicates that there is a mismatch between the embedding dimensions of the two models being compared in the `vector_db.similarity_search()` function. The expected embedding dimension is 768, but the actual embedding dimension is 384.
+
+To solve this issue, you can either:
+
+1. Change the embedding dimension of one or both of the models to match the other model's embedding dimension. For example, if the query model has an embedding dimension of 768, you can adjust the document model's embedding dimension to 768 as well.
+2. Use a different similarity search algorithm that doesn't require matching embedding dimensions. For example, you could use the `vector_db.cosine_similarity()` function instead of `vector_db.similarity_search()`. This function calculates the cosine similarity between two vectors and does not require matching embedding dimensions.
+3. Use a different approach to compare the vectors, such as using a distance metric like Euclidean distance or Manhattan distance. These distances do not rely on the embedding dimension and can be used to compare vectors with different dimensions.
+
+In your case, since you are using the `vector_db.similarity_search()` function, I would recommend changing the embedding dimension of one or both of the models to match the other model's embedding dimension. You can do this by modifying the model's architecture or by adjusting the hyperparameters of the model.
+
+For example, if you are using a transformer-based model like BERT, you can try adjusting the number of layers or the size of the attention mechanism to increase the embedding dimension. Alternatively, you can try using a different pre-trained model with a larger embedding dimension, such as RoBERTa or DistilBERT.
+
+Once you have changed the embedding dimension of one or both of the models, you can retry the `vector_db.similarity_search()` function to see if it works correctly.

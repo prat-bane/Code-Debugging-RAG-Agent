@@ -1,0 +1,5 @@
+```
+
+### Solution
+
+The error happens because the RAG model is trained on an embedding layer of size 768 while we're trying to use it with a smaller embedding (k=3). The best solution is simply to increase the k value of the similarity search.
