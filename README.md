@@ -57,14 +57,61 @@ The agent will:
 | **Energy benchmarking** | `ollama_benchmark_clean.py` measures time, Δ‑RAM, CO₂, tokens/s. |
 | **Pluggable indexes** | IVF + PQ (Marqo default) vs. HNSW (FAISS). |
 
+
+## Project Structure
+```text
+RAG_PROJECT/
+├── api.py                     # FastAPI service (uses FAISS by default)
+├── rag_debugger.py            # Marqo RAG pipeline
+├── rag_faiss_debugger.py      # FAISS RAG pipeline
+├── mailer.py                  # send_email()
+├── marqodb_client.py          # helper to (re)index Marqo
+├── benchmark_models.py        # quick LLM benchmark
+├── ollama_benchmark_clean.py  # energy‑efficiency benchmark
+├── codebase/                  # code snippets (.txt) to be indexed
+├── faiss_hnsw.pkl             # FAISS index (auto‑generated)
+├── emissions.csv              # CodeCarbon logs
+├── agno_demo_app_error.log    # sample error log
+```
 ---
 
-## Installation
+## 🛠️ Installation
 
-1. **Clone This Repository**:
+```bash
+git clone https://github.com/your‑username/code‑debugging‑rag‑agent.git
+cd code‑debugging‑rag‑agent
+```
 
+## ⚙️ Setup & Usage
+1) Run Marqo (optional)
+If you plan to use the Marqo retrieval path:
+```bash
+docker rm -f marqo
+docker pull marqoai/marqo:latest
+docker run --name marqo -it -p 8882:8882 marqoai/marqo:latest
+```
+
+2) Configure Ollama
+```bash
+ollama pull llama3.2:1b    # or any model you prefer
+ollama serve
+```
+3) Populate .env
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password      # Gmail App Password
+EMAIL_FROM="AI Debugger <your_email@gmail.com>"
+RECIPIENT=recipient@email.com    # address to receive fixes
+```
+
+4) Start the API
    ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
-
-
+   uvicorn api:app --reload --host 0.0.0.0 --port 8000
+   ```
+5) Send a Log & Get Email
+```bash
+curl -F "file=@agno_demo_app_error.log;type=text/plain" \
+     http://localhost:8000/debug
+```
